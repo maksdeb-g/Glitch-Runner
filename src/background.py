@@ -5,7 +5,7 @@ import math
 from src.constants import *
 
 class Background:
-    """Class to handle the game background with glitch effects"""
+    """Class to handle the game background with simple effects"""
     
     def __init__(self, level_num):
         self.level_num = level_num
@@ -22,64 +22,46 @@ class Background:
             except pygame.error:
                 print(f"Could not load background image: {bg_path}")
         
-        # Get background color from level data
+        # Get background color from level data - using more neutral colors
         if level_num == 1:
-            self.bg_color = (20, 20, 35)  # Darker blue/purple for better contrast
+            self.bg_color = (30, 30, 40)  # Soft blue-gray
         elif level_num == 2:
-            self.bg_color = (25, 10, 40)  # Darker purple for better contrast
+            self.bg_color = (35, 25, 45)  # Soft purple-gray
         else:
-            self.bg_color = (40, 5, 20)  # Darker red for better contrast
+            self.bg_color = (40, 25, 30)  # Soft red-gray
         
         # Create procedural background elements
-        self.grid_size = 40  # Larger grid for less visual noise
-        self.grid_color = (255, 255, 255, 5)  # Very transparent white
+        self.grid_size = 80  # Much larger grid for minimal visual noise
+        self.grid_color = (255, 255, 255, 2)  # Extremely transparent white
         
-        # Glitch effect variables
+        # Minimal visual elements
         self.glitch_lines = []
-        self.glitch_blocks = []
         self.glitch_timer = 0
-        self.generate_glitch_elements()
+        
+        # Only generate visual elements for level 2 and 3
+        if level_num > 1:
+            self.generate_minimal_elements()
     
-    def generate_glitch_elements(self):
-        """Generate random glitch elements based on level"""
+    def generate_minimal_elements(self):
+        """Generate minimal visual elements based on level"""
         # Clear existing elements
         self.glitch_lines = []
-        self.glitch_blocks = []
         
-        # Generate horizontal glitch lines
-        num_lines = self.level_num * 2
+        # Generate just a few horizontal lines
+        num_lines = self.level_num  # 2 for level 2, 3 for level 3
         for _ in range(num_lines):
             y = random.randint(0, SCREEN_HEIGHT)
-            width = random.randint(50, 200)
+            width = random.randint(100, 300)
             x = random.randint(0, SCREEN_WIDTH - width)
-            opacity = random.randint(20, 60)  # Lower opacity for better visibility
-            color = (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255), opacity)
+            opacity = random.randint(10, 30)  # Very low opacity
+            color = (200, 200, 200, opacity)  # Light gray, less distracting
             self.glitch_lines.append({
                 'x': x,
                 'y': y,
                 'width': width,
-                'height': random.randint(1, 3),
+                'height': 1,  # Just 1 pixel height
                 'color': color,
-                'lifetime': random.randint(30, 120),
-                'age': 0
-            })
-        
-        # Generate glitch blocks
-        num_blocks = self.level_num
-        for _ in range(num_blocks):
-            x = random.randint(0, SCREEN_WIDTH - 50)
-            y = random.randint(0, SCREEN_HEIGHT - 50)
-            width = random.randint(10, 50)
-            height = random.randint(10, 50)
-            opacity = random.randint(20, 60)  # Lower opacity for better visibility
-            color = (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255), opacity)
-            self.glitch_blocks.append({
-                'x': x,
-                'y': y,
-                'width': width,
-                'height': height,
-                'color': color,
-                'lifetime': random.randint(30, 120),
+                'lifetime': random.randint(60, 180),
                 'age': 0
             })
     
@@ -87,86 +69,57 @@ class Background:
         """Update background elements"""
         self.glitch_timer += 1
         
-        # Regenerate glitch elements periodically
-        if self.glitch_timer >= 60:  # Every second (assuming 60 FPS)
-            self.glitch_timer = 0
-            if random.random() < 0.2:  # 20% chance each second (reduced from 30%)
-                self.generate_glitch_elements()
-        
-        # Update glitch lines
-        for line in self.glitch_lines[:]:
-            line['age'] += 1
-            if line['age'] >= line['lifetime']:
-                self.glitch_lines.remove(line)
-        
-        # Update glitch blocks
-        for block in self.glitch_blocks[:]:
-            block['age'] += 1
-            if block['age'] >= block['lifetime']:
-                self.glitch_blocks.remove(block)
+        # Only update visual elements for level 2 and 3
+        if self.level_num > 1:
+            # Regenerate elements very infrequently
+            if self.glitch_timer >= 180:  # Every 3 seconds (assuming 60 FPS)
+                self.glitch_timer = 0
+                if random.random() < 0.1:  # Only 10% chance
+                    self.generate_minimal_elements()
+            
+            # Update glitch lines
+            for line in self.glitch_lines[:]:
+                line['age'] += 1
+                if line['age'] >= line['lifetime']:
+                    self.glitch_lines.remove(line)
     
     def draw_procedural_background(self, surface):
-        """Draw a procedurally generated background"""
+        """Draw a very simple procedurally generated background"""
         # Fill with base color
         surface.fill(self.bg_color)
         
-        # Draw grid (level 1) - simplified for better visibility
+        # Level 1: Just a simple grid with large spacing
         if self.level_num == 1:
+            for x in range(0, SCREEN_WIDTH, self.grid_size):
+                pygame.draw.line(surface, (255, 255, 255, 2), (x, 0), (x, SCREEN_HEIGHT), 1)
+            for y in range(0, SCREEN_HEIGHT, self.grid_size):
+                pygame.draw.line(surface, (255, 255, 255, 2), (0, y), (SCREEN_WIDTH, y), 1)
+        
+        # Level 2: Very subtle grid
+        elif self.level_num == 2:
             for x in range(0, SCREEN_WIDTH, self.grid_size):
                 pygame.draw.line(surface, (255, 255, 255, 3), (x, 0), (x, SCREEN_HEIGHT), 1)
             for y in range(0, SCREEN_HEIGHT, self.grid_size):
                 pygame.draw.line(surface, (255, 255, 255, 3), (0, y), (SCREEN_WIDTH, y), 1)
         
-        # Draw distorted grid (level 2) - simplified for better visibility
-        elif self.level_num == 2:
-            for x in range(0, SCREEN_WIDTH, self.grid_size):
-                points = [(x, 0)]
-                for y in range(self.grid_size, SCREEN_HEIGHT, self.grid_size):
-                    offset = math.sin(y / 30 + self.glitch_timer / 10) * 5
-                    points.append((x + offset, y))
-                pygame.draw.lines(surface, (255, 255, 255, 5), False, points, 1)
-            
-            for y in range(0, SCREEN_HEIGHT, self.grid_size):
-                points = [(0, y)]
-                for x in range(self.grid_size, SCREEN_WIDTH, self.grid_size):
-                    offset = math.sin(x / 30 + self.glitch_timer / 10) * 5
-                    points.append((x, y + offset))
-                pygame.draw.lines(surface, (255, 255, 255, 5), False, points, 1)
-        
-        # Draw corrupted grid (level 3) - simplified for better visibility
+        # Level 3: Slightly more visible grid
         elif self.level_num == 3:
             for x in range(0, SCREEN_WIDTH, self.grid_size):
-                for y in range(0, SCREEN_HEIGHT, self.grid_size):
-                    if random.random() < 0.6:  # 60% chance to draw each cell (reduced from 80%)
-                        cell_color = (
-                            min(255, self.bg_color[0] + random.randint(0, 30)),
-                            min(255, self.bg_color[1] + random.randint(0, 30)),
-                            min(255, self.bg_color[2] + random.randint(0, 30))
-                        )
-                        pygame.draw.rect(surface, cell_color, 
-                                        (x, y, self.grid_size, self.grid_size), 1)
+                pygame.draw.line(surface, (255, 255, 255, 4), (x, 0), (x, SCREEN_HEIGHT), 1)
+            for y in range(0, SCREEN_HEIGHT, self.grid_size):
+                pygame.draw.line(surface, (255, 255, 255, 4), (0, y), (SCREEN_WIDTH, y), 1)
         
-        # Draw glitch lines
-        for line in self.glitch_lines:
-            # Calculate opacity based on lifetime
-            alpha = 255 * (1 - line['age'] / line['lifetime'])
-            color = line['color'][:3] + (int(alpha),)
-            
-            # Create a surface for the line with alpha
-            line_surface = pygame.Surface((line['width'], line['height']), pygame.SRCALPHA)
-            line_surface.fill(color)
-            surface.blit(line_surface, (line['x'], line['y']))
-        
-        # Draw glitch blocks
-        for block in self.glitch_blocks:
-            # Calculate opacity based on lifetime
-            alpha = 255 * (1 - block['age'] / block['lifetime'])
-            color = block['color'][:3] + (int(alpha),)
-            
-            # Create a surface for the block with alpha
-            block_surface = pygame.Surface((block['width'], block['height']), pygame.SRCALPHA)
-            block_surface.fill(color)
-            surface.blit(block_surface, (block['x'], block['y']))
+        # Draw minimal glitch lines (only for level 2 and 3)
+        if self.level_num > 1:
+            for line in self.glitch_lines:
+                # Calculate opacity based on lifetime
+                alpha = 255 * (1 - line['age'] / line['lifetime'])
+                color = line['color'][:3] + (int(alpha),)
+                
+                # Create a surface for the line with alpha
+                line_surface = pygame.Surface((line['width'], line['height']), pygame.SRCALPHA)
+                line_surface.fill(color)
+                surface.blit(line_surface, (line['x'], line['y']))
     
     def draw(self, surface):
         """Draw the background"""
