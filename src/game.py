@@ -8,11 +8,14 @@ from src.level_data import LEVELS
 from src.sound_manager import SoundManager
 from src.constants import *
 
+# Add a version constant to easily identify which version is running
+VERSION = "2.0 - June 16, 2025"
+
 class Game:
     def __init__(self):
         # Set up the display
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Glitch Runner")
+        pygame.display.set_caption(f"Glitch Runner {VERSION}")
         
         # Set up the clock
         self.clock = pygame.time.Clock()
@@ -166,7 +169,6 @@ class Game:
                 time_bonus = max(0, 60 - int(time.time() - self.level_start_time)) * 10
                 self.score += time_bonus
             
-            
             # Check for enemy collision
             if self.current_level.check_enemy_collision(self.player):
                 self.lives -= 1
@@ -210,6 +212,10 @@ class Game:
         title_text = self.title_font.render("GLITCH RUNNER", True, GLITCH_COLOR)
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
         self.screen.blit(title_text, title_rect)
+        
+        # Draw version number
+        version_text = self.font.render(f"Version: {VERSION}", True, (255, 255, 255))
+        self.screen.blit(version_text, (SCREEN_WIDTH - version_text.get_width() - 10, SCREEN_HEIGHT - 30))
         
         # Draw instructions
         instructions = [
@@ -286,6 +292,10 @@ class Game:
         # Draw return to menu text
         menu_text = self.font.render("Press ENTER to return to menu", True, (255, 255, 255))
         self.screen.blit(menu_text, (SCREEN_WIDTH // 2 - menu_text.get_width() // 2, SCREEN_HEIGHT // 2 + 30))
+        
+        # Draw version number
+        version_text = self.font.render(f"Version: {VERSION}", True, (255, 255, 255))
+        self.screen.blit(version_text, (SCREEN_WIDTH - version_text.get_width() - 10, SCREEN_HEIGHT - 30))
     
     def render_playing(self):
         # Clear the render surface with the level background color
@@ -321,6 +331,10 @@ class Game:
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
         self.screen.blit(score_text, (10, 70))
         
+        # Draw version number
+        version_text = self.font.render(f"Version: {VERSION}", True, (255, 255, 255))
+        self.screen.blit(version_text, (SCREEN_WIDTH - version_text.get_width() - 10, 10))
+        
         # Draw active glitches
         if self.glitch_engine.active_glitches:
             active_glitches = [g['effect'].__name__.replace('_', ' ').upper() for g in self.glitch_engine.active_glitches]
@@ -330,7 +344,7 @@ class Game:
         # Draw debug info
         if DEBUG_MODE:
             fps_text = self.font.render(f"FPS: {int(self.clock.get_fps())}", True, (255, 255, 255))
-            self.screen.blit(fps_text, (SCREEN_WIDTH - 100, 10))
+            self.screen.blit(fps_text, (SCREEN_WIDTH - 100, 40))
             
             # Draw controls help
             controls = [
@@ -343,7 +357,7 @@ class Game:
             
             for i, text in enumerate(controls):
                 help_text = self.font.render(text, True, (255, 255, 255))
-                self.screen.blit(help_text, (SCREEN_WIDTH - 250, 40 + i * 20))
+                self.screen.blit(help_text, (SCREEN_WIDTH - 250, 70 + i * 20))
     
     def render(self):
         if self.game_state == "menu":

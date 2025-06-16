@@ -1,5 +1,21 @@
 import pygame
 import os
+import sys
+
+# Try to import the resource_path function
+try:
+    from resource_path import resource_path
+except ImportError:
+    # If not available, define it here
+    def resource_path(relative_path):
+        """Get absolute path to resource, works for dev and for PyInstaller"""
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        
+        return os.path.join(base_path, relative_path)
 
 class SoundManager:
     def __init__(self):
@@ -18,7 +34,7 @@ class SoundManager:
     
     def load_sounds(self):
         """Load all game sounds"""
-        sound_path = os.path.join('assets', 'sounds')
+        sound_path = resource_path(os.path.join('assets', 'sounds'))
         
         # Check if sound files exist and load them
         try:
@@ -62,7 +78,7 @@ class SoundManager:
     
     def play_music(self, music_name):
         """Play background music"""
-        music_path = os.path.join('assets', 'sounds', f'{music_name}.mp3')
+        music_path = resource_path(os.path.join('assets', 'sounds', f'{music_name}.mp3'))
         
         # Check if music file exists
         if os.path.exists(music_path):
@@ -91,41 +107,72 @@ class SoundManager:
         """Generate a simple music file using pygame's synth capabilities"""
         # This is a very basic placeholder - in a real game you'd use actual music files
         # This creates a simple sine wave pattern
-        import numpy as np
-        from io import BytesIO
-        
-        sample_rate = 44100
-        duration = 5.0  # 5 seconds
-        
-        # Generate a simple melody
-        t = np.linspace(0, duration, int(sample_rate * duration), False)
-        
-        # Create a simple melody pattern
-        notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]  # C4 to C5
-        melody = np.zeros_like(t)
-        
-        note_duration = 0.5  # half a second per note
-        for i, note in enumerate(notes):
-            start = int(i * note_duration * sample_rate)
-            end = int((i + 1) * note_duration * sample_rate)
-            if end > len(t):
-                break
-            melody[start:end] = np.sin(2 * np.pi * note * t[start:end])
-        
-        # Convert to 16-bit PCM
-        melody = (melody * 32767).astype(np.int16)
-        
-        # Save to a BytesIO object
-        buffer = BytesIO()
-        import wave
-        with wave.open(buffer, 'wb') as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(sample_rate)
-            wf.writeframes(melody.tobytes())
-        
-        buffer.seek(0)
-        return buffer
+        try:
+            import numpy as np
+            from io import BytesIO
+            
+            sample_rate = 44100
+            duration = 5.0  # 5 seconds
+            
+            # Generate a simple melody
+            t = np.linspace(0, duration, int(sample_rate * duration), False)
+            
+            # Create a simple melody pattern
+            notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]  # C4 to C5
+            melody = np.zeros_like(t)
+            
+            note_duration = 0.5  # half a second per note
+            for i, note in enumerate(notes):
+                start = int(i * note_duration * sample_rate)
+                end = int((i + 1) * note_duration * sample_rate)
+                if end > len(t):
+                    break
+                melody[start:end] = np.sin(2 * np.pi * note * t[start:end])
+            
+            # Convert to 16-bit PCM
+            melody = (melody * 32767).astype(np.int16)
+            
+            # Save to a BytesIO object
+            buffer = BytesIO()
+            import wave
+            with wave.open(buffer, 'wb') as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sample_rate)
+                wf.writeframes(melody.tobytes())
+            
+            buffer.seek(0)
+            return buffer
+        except ImportError:
+            # If numpy is not available, create a simple beep sound
+            print("NumPy not available, creating simple beep sound")
+            from array import array
+            from math import sin, pi
+            
+            sample_rate = 44100
+            duration = 1.0  # 1 second
+            volume = 0.5
+            
+            # Generate a simple sine wave
+            n_samples = int(sample_rate * duration)
+            sound_buffer = array("h", [0] * n_samples)
+            
+            for i in range(n_samples):
+                sample = int(volume * 32767.0 * sin(2 * pi * 440 * i / sample_rate))
+                sound_buffer[i] = sample
+            
+            # Save to a BytesIO object
+            from io import BytesIO
+            buffer = BytesIO()
+            import wave
+            with wave.open(buffer, 'wb') as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(sample_rate)
+                wf.writeframes(sound_buffer.tobytes())
+            
+            buffer.seek(0)
+            return buffer
     
     def stop_music(self):
         """Stop the currently playing music"""

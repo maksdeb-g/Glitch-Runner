@@ -76,13 +76,44 @@ class Player(pygame.sprite.Sprite):
         # Try to load sounds if they exist
         try:
             pygame.mixer.init()
-            sound_path = os.path.join('assets', 'sounds')
             
-            # Check for jump audio
-            jump_audio_path = os.path.join(sound_path, 'jump-audio.mp3')
-            if os.path.exists(jump_audio_path):
-                self.jump_sound = pygame.mixer.Sound(jump_audio_path)
-                self.double_jump_sound = self.jump_sound  # Use same sound for double jump
+            # Import resource_path function
+            try:
+                # First try to import from the module
+                from resource_path import resource_path
+            except ImportError:
+                # Define it locally if import fails
+                def resource_path(relative_path):
+                    try:
+                        base_path = sys._MEIPASS
+                    except Exception:
+                        base_path = os.path.abspath(".")
+                    return os.path.join(base_path, relative_path)
+            
+            # Try multiple possible paths for the jump sound
+            possible_paths = [
+                resource_path(os.path.join('assets', 'sounds', 'jump-audio.mp3')),
+                resource_path(os.path.join('assets', 'sounds', 'jump-audio.wav')),
+                resource_path(os.path.join('assets', 'sounds', 'jump.mp3')),
+                resource_path(os.path.join('assets', 'sounds', 'jump.wav')),
+                os.path.join('assets', 'sounds', 'jump-audio.mp3'),
+                os.path.join('assets', 'sounds', 'jump-audio.wav')
+            ]
+            
+            # Try each path until we find a valid sound file
+            for path in possible_paths:
+                try:
+                    if os.path.exists(path):
+                        self.jump_sound = pygame.mixer.Sound(path)
+                        self.double_jump_sound = self.jump_sound  # Use same sound for double jump
+                        print(f"Successfully loaded jump sound from: {path}")
+                        break
+                except Exception as e:
+                    print(f"Failed to load sound from {path}: {e}")
+            
+            if self.jump_sound is None:
+                print("Could not find any jump sound files")
+                
         except Exception as e:
             print(f"Sound files could not be loaded: {e}. Continuing without sound.")
     

@@ -1,43 +1,28 @@
 import pygame
 import os
-from src.constants import *
+import sys
+
+# Try to import the resource_path function
+try:
+    from resource_path import resource_path
+except ImportError:
+    # If not available, define it here
+    def resource_path(relative_path):
+        """Get absolute path to resource, works for dev and for PyInstaller"""
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        
+        return os.path.join(base_path, relative_path)
 
 class SpriteLoader:
-    """Helper class to load and process sprite sheets"""
-    
-    @staticmethod
-    def load_spritesheet(filename, frame_width, frame_height, num_frames):
-        """Load a spritesheet and split it into individual frames"""
-        try:
-            # Try to load the spritesheet
-            spritesheet = pygame.image.load(filename).convert_alpha()
-            
-            # Create a list to store individual frames
-            frames = []
-            
-            # Extract each frame from the spritesheet
-            for i in range(num_frames):
-                # Calculate the position of the frame in the spritesheet
-                x = i * frame_width
-                y = 0
-                
-                # Create a new surface for the frame
-                frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
-                
-                # Copy the frame from the spritesheet
-                frame.blit(spritesheet, (0, 0), (x, y, frame_width, frame_height))
-                
-                # Add the frame to the list
-                frames.append(frame)
-            
-            return frames
-        except pygame.error as e:
-            print(f"Error loading spritesheet {filename}: {e}")
-            return None
+    """Utility class for loading and managing sprites"""
     
     @staticmethod
     def load_player_sprites():
-        """Load all player sprites from the assets directory"""
+        """Load player sprites from assets directory"""
         sprites = {
             'idle_right': [],
             'idle_left': [],
@@ -51,124 +36,121 @@ class SpriteLoader:
             'wall_slide_left': []
         }
         
-        # Check for Pink Monster sprites in the sprites directory
-        pink_monster_path = os.path.join('assets', 'sprites', '1 Pink_Monster')
-        
-        # Define sprite mappings
-        sprite_files = {
-            'idle': ('Pink_Monster_Idle_4.png', 4),
-            'run': ('Pink_Monster_Run_6.png', 6),
-            'jump': ('Pink_Monster_Jump_8.png', 8),
-            'walk': ('Pink_Monster_Walk_6.png', 6),
-        }
-        
-        # Try to load sprites from the Pink Monster directory
-        if os.path.exists(pink_monster_path):
-            # Get the first sprite to determine dimensions
-            first_sprite_path = os.path.join(pink_monster_path, 'Pink_Monster.png')
-            try:
-                first_sprite = pygame.image.load(first_sprite_path).convert_alpha()
-                sprite_width = first_sprite.get_width()
-                sprite_height = first_sprite.get_height()
-                
-                # Load each sprite sheet
-                for sprite_type, (filename, num_frames) in sprite_files.items():
-                    sprite_path = os.path.join(pink_monster_path, filename)
-                    if os.path.exists(sprite_path):
-                        # Load the spritesheet
-                        frames = SpriteLoader.load_spritesheet(
-                            sprite_path, 
-                            sprite_width, 
-                            sprite_height, 
-                            num_frames
-                        )
-                        
-                        if frames:
-                            # Map to appropriate animation states
-                            if sprite_type == 'idle':
-                                sprites['idle_right'] = frames
-                                # Create flipped versions for left-facing animations
-                                sprites['idle_left'] = [pygame.transform.flip(frame, True, False) for frame in frames]
-                            
-                            elif sprite_type == 'run':
-                                sprites['run_right'] = frames
-                                sprites['run_left'] = [pygame.transform.flip(frame, True, False) for frame in frames]
-                            
-                            elif sprite_type == 'walk':
-                                # Use walk animation as fallback for wall slide
-                                sprites['wall_slide_right'] = frames
-                                sprites['wall_slide_left'] = [pygame.transform.flip(frame, True, False) for frame in frames]
-                            
-                            elif sprite_type == 'jump':
-                                # Use first half of jump animation for jump
-                                half = num_frames // 2
-                                sprites['jump_right'] = frames[:half]
-                                sprites['jump_left'] = [pygame.transform.flip(frame, True, False) for frame in frames[:half]]
-                                
-                                # Use second half of jump animation for fall
-                                sprites['fall_right'] = frames[half:]
-                                sprites['fall_left'] = [pygame.transform.flip(frame, True, False) for frame in frames[half:]]
-                
-                # Scale sprites to match player size
-                for state in sprites:
-                    sprites[state] = [pygame.transform.scale(frame, (PLAYER_WIDTH, PLAYER_HEIGHT)) 
-                                     for frame in sprites[state]]
-                
-                print("Successfully loaded Pink Monster sprites")
-                return sprites
+        # Try to load sprites from assets directory
+        try:
+            # Check if player sprites directory exists
+            player_dir = resource_path(os.path.join('assets', 'images', 'player'))
+            print(f"Looking for player sprites in: {player_dir}")
             
-            except pygame.error as e:
-                print(f"Error loading Pink Monster sprites: {e}")
+            if os.path.exists(player_dir):
+                print(f"Player directory exists: {player_dir}")
+                # List all files in the directory to debug
+                try:
+                    files = os.listdir(player_dir)
+                    print(f"Files in player directory: {files}")
+                except Exception as e:
+                    print(f"Error listing directory: {e}")
+                
+                # Load sprites from files
+                SpriteLoader._load_sprites_from_directory(sprites, player_dir)
+            else:
+                print(f"Player directory does not exist: {player_dir}")
+                # Create placeholder sprites
+                SpriteLoader._create_placeholder_sprites(sprites)
+                
+        except Exception as e:
+            print(f"Error loading player sprites: {e}")
+            # Create placeholder sprites as fallback
+            SpriteLoader._create_placeholder_sprites(sprites)
         
-        # If we get here, either the sprites don't exist or there was an error loading them
-        # Create placeholder sprites
-        print("Using placeholder sprites")
-        return SpriteLoader.create_placeholder_sprites()
+        # Verify that sprites were loaded
+        for key, frames in sprites.items():
+            print(f"Sprite {key}: {len(frames)} frames")
+            
+        return sprites
     
     @staticmethod
-    def create_placeholder_sprites():
-        """Create placeholder sprites if actual sprites can't be loaded"""
-        sprites = {
-            'idle_right': [],
-            'idle_left': [],
-            'run_right': [],
-            'run_left': [],
-            'jump_right': [],
-            'jump_left': [],
-            'fall_right': [],
-            'fall_left': [],
-            'wall_slide_right': [],
-            'wall_slide_left': []
+    def _load_sprites_from_directory(sprites, directory):
+        """Load sprites from files in the given directory"""
+
+        # For each animation type, look for sprite sheets or individual frames
+        sprite_files = {
+            'idle': 'Pink_Monster_Idle_4.png',
+            'run': 'Pink_Monster_Run_6.png',
+            'jump': 'Pink_Monster_Jump_8.png',
+            'fall': 'Pink_Monster_Jump_8.png',  # Use jump for fall animation
+            'wall_slide': 'Pink_Monster_Climb_4.png'  # Use climb for wall slide
         }
+
+        # Try to load each sprite type
+        for anim_type, filename in sprite_files.items():
+            full_path = os.path.join(directory, filename)
+            print(f"Checking for sprite file: {full_path}")
+            
+            if os.path.exists(full_path):
+                print(f"Loading sprite file: {full_path}")
+                try:
+                    # Load the sprite sheet
+                    sprite_sheet = pygame.image.load(full_path).convert_alpha()
+
+                    # Get frame count from filename (e.g., "Pink_Monster_Run_6.png" has 6 frames)
+                    frame_count = int(filename.split('_')[-1].split('.')[0])
+
+                    # Calculate frame width
+                    frame_width = sprite_sheet.get_width() // frame_count
+                    frame_height = sprite_sheet.get_height()
+
+                    # Extract individual frames
+                    frames = []
+                    for i in range(frame_count):
+                        frame = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+                        frame.blit(sprite_sheet, (0, 0), (i * frame_width, 0, frame_width, frame_height))
+                        frames.append(frame)
+
+                    # Assign frames to appropriate animation states
+                    sprites[f'{anim_type}_right'] = frames
+                    # Create flipped versions for left-facing animations
+                    sprites[f'{anim_type}_left'] = [pygame.transform.flip(frame, True, False) for frame in frames]
+                    
+                    print(f"Successfully loaded {len(frames)} frames for {anim_type}")
+                except Exception as e:
+                    print(f"Error loading sprite {filename}: {e}")
+            else:
+                print(f"Sprite file not found: {full_path}")
+    @staticmethod
+    def _create_placeholder_sprites(sprites):
+        """Create placeholder sprites when assets are not available"""
+        from src.constants import PLAYER_WIDTH, PLAYER_HEIGHT
         
-        # Create 4 frames for each animation state
-        for state in sprites:
-            for i in range(4):
-                # Create a surface for the frame
-                frame = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT), pygame.SRCALPHA)
-                
-                # Different colors for different states
-                if 'idle' in state:
-                    frame.fill(PLAYER_COLOR)
-                elif 'run' in state:
-                    frame.fill((0, 200, 0))
-                elif 'jump' in state:
-                    frame.fill((0, 255, 100))
-                elif 'fall' in state:
-                    frame.fill((0, 150, 0))
-                elif 'wall_slide' in state:
-                    frame.fill((0, 100, 0))
-                
-                # Add a visual indicator for direction
-                if 'right' in state:
-                    pygame.draw.rect(frame, (255, 255, 255), (PLAYER_WIDTH - 10, 10, 5, 5))
-                else:
-                    pygame.draw.rect(frame, (255, 255, 255), (5, 10, 5, 5))
-                
-                # Add animation frame indicator
-                pygame.draw.rect(frame, (255, 255, 255), (10 + i*5, PLAYER_HEIGHT - 10, 5, 5))
-                
-                # Add the frame to the list
-                sprites[state].append(frame)
+        # Create a simple rectangle for the player
+        right_sprite = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT), pygame.SRCALPHA)
+        right_sprite.fill((0, 255, 0))  # Green rectangle
         
-        return sprites
+        # Add some details to distinguish different states
+        pygame.draw.rect(right_sprite, (0, 200, 0), (0, 0, PLAYER_WIDTH, PLAYER_HEIGHT), 2)
+        pygame.draw.line(right_sprite, (0, 200, 0), (0, 0), (PLAYER_WIDTH, PLAYER_HEIGHT), 2)
+        pygame.draw.line(right_sprite, (0, 200, 0), (0, PLAYER_HEIGHT), (PLAYER_WIDTH, 0), 2)
+        
+        # Create left-facing sprite by flipping the right one
+        left_sprite = pygame.transform.flip(right_sprite, True, False)
+        
+        # Create variations for different states
+        jump_right = right_sprite.copy()
+        pygame.draw.polygon(jump_right, (0, 200, 0), [(0, PLAYER_HEIGHT), (PLAYER_WIDTH//2, PLAYER_HEIGHT//2), (PLAYER_WIDTH, PLAYER_HEIGHT)], 2)
+        jump_left = pygame.transform.flip(jump_right, True, False)
+        
+        run_right = right_sprite.copy()
+        pygame.draw.rect(run_right, (0, 200, 0), (PLAYER_WIDTH//4, PLAYER_HEIGHT//4, PLAYER_WIDTH//2, PLAYER_HEIGHT//2), 2)
+        run_left = pygame.transform.flip(run_right, True, False)
+        
+        # Assign sprites to each animation state
+        sprites['idle_right'] = [right_sprite]
+        sprites['idle_left'] = [left_sprite]
+        sprites['run_right'] = [run_right]
+        sprites['run_left'] = [run_left]
+        sprites['jump_right'] = [jump_right]
+        sprites['jump_left'] = [jump_left]
+        sprites['fall_right'] = [jump_right]
+        sprites['fall_left'] = [jump_left]
+        sprites['wall_slide_right'] = [right_sprite]
+        sprites['wall_slide_left'] = [left_sprite]
