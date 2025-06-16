@@ -11,6 +11,10 @@ GLITCH_COLOR = (255, 0, 255)  # Magenta for glitch effects
 ENEMY_COLOR = (255, 50, 50)   # Red for enemies
 EXIT_COLOR = (0, 255, 255)    # Cyan for level exit
 
+# Sound settings
+DEFAULT_MUSIC_VOLUME = 0.3
+DEFAULT_SFX_VOLUME = 0.5  # Increased from 0.2 to make sound effects more audible
+
 # Player settings
 PLAYER_WIDTH = 32
 PLAYER_HEIGHT = 32

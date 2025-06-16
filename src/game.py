@@ -102,10 +102,11 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             
-            # Toggle debug mode with F3
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_F3:
-                global DEBUG_MODE
-                DEBUG_MODE = not DEBUG_MODE
+            # Handle key presses
+            if event.type == pygame.KEYDOWN:
+                # M key to toggle mute music
+                if event.key == pygame.K_m:
+                    self.sound_manager.toggle_mute()
             
             # Menu controls
             if self.game_state == "menu":
@@ -217,6 +218,10 @@ class Game:
         version_text = self.font.render(f"Version: {VERSION}", True, (255, 255, 255))
         self.screen.blit(version_text, (SCREEN_WIDTH - version_text.get_width() - 10, SCREEN_HEIGHT - 30))
         
+        # Draw music status
+        music_text = self.font.render(f"Music: {self.sound_manager.get_music_status()}", True, (255, 255, 255))
+        self.screen.blit(music_text, (10, SCREEN_HEIGHT - 30))
+        
         # Draw instructions
         instructions = [
             "Navigate through glitchy levels to reach the exit portal",
@@ -225,7 +230,7 @@ class Game:
             "Controls:",
             "Arrow Keys: Move",
             "Space: Jump/Double Jump",
-            "F3: Toggle Debug Mode",
+            "M: Toggle Music On/Off",
             "",
             "Press ENTER to Start"
         ]
@@ -330,6 +335,10 @@ class Game:
         # Draw score
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
         self.screen.blit(score_text, (10, 70))
+        
+        # Draw music status
+        music_text = self.font.render(f"Music: {self.sound_manager.get_music_status()}", True, (255, 255, 255))
+        self.screen.blit(music_text, (10, 100))
         
         # Draw version number
         version_text = self.font.render(f"Version: {VERSION}", True, (255, 255, 255))

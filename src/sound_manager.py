@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+from src.constants import DEFAULT_MUSIC_VOLUME, DEFAULT_SFX_VOLUME
 
 # Try to import the resource_path function
 try:
@@ -22,9 +23,10 @@ class SoundManager:
         # Initialize pygame mixer
         pygame.mixer.init()
         
-        # Set volume levels
-        self.music_volume = 0.5
-        self.sfx_volume = 0.7
+        # Set volume levels from constants
+        self.music_volume = DEFAULT_MUSIC_VOLUME
+        self.sfx_volume = DEFAULT_SFX_VOLUME
+        self.muted = False
         
         # Dictionary to store sound effects
         self.sounds = {}
@@ -35,38 +37,50 @@ class SoundManager:
     def load_sounds(self):
         """Load all game sounds"""
         sound_path = resource_path(os.path.join('assets', 'sounds'))
+        print(f"Looking for sound files in: {sound_path}")
         
         # Check if sound files exist and load them
         try:
             # Sound effects
-            if os.path.exists(os.path.join(sound_path, 'jump.wav')):
-                self.sounds['jump'] = pygame.mixer.Sound(os.path.join(sound_path, 'jump.wav'))
+            self._try_load_sound('jump', [
+                os.path.join(sound_path, 'jump.wav'),
+                os.path.join(sound_path, 'jump-audio.mp3'),
+                os.path.join(sound_path, 'jump.mp3')
+            ])
             
-            if os.path.exists(os.path.join(sound_path, 'jump-audio.mp3')):
-                self.sounds['jump'] = pygame.mixer.Sound(os.path.join(sound_path, 'jump-audio.mp3'))
+            self._try_load_sound('land', [
+                os.path.join(sound_path, 'land.wav')
+            ])
             
-            if os.path.exists(os.path.join(sound_path, 'land.wav')):
-                self.sounds['land'] = pygame.mixer.Sound(os.path.join(sound_path, 'land.wav'))
+            self._try_load_sound('glitch', [
+                os.path.join(sound_path, 'glitch.wav')
+            ])
             
-            if os.path.exists(os.path.join(sound_path, 'glitch.wav')):
-                self.sounds['glitch'] = pygame.mixer.Sound(os.path.join(sound_path, 'glitch.wav'))
-            
-            if os.path.exists(os.path.join(sound_path, 'level_complete.wav')):
-                self.sounds['level_complete'] = pygame.mixer.Sound(os.path.join(sound_path, 'level_complete.wav'))
+            self._try_load_sound('level_complete', [
+                os.path.join(sound_path, 'level_complete.wav')
+            ])
             
             # Game over sound (single death)
-            if os.path.exists(os.path.join(sound_path, 'pixel-explosion-319166.mp3')):
-                self.sounds['game_over'] = pygame.mixer.Sound(os.path.join(sound_path, 'pixel-explosion-319166.mp3'))
-            elif os.path.exists(os.path.join(sound_path, 'game-over.mp3')):
-                self.sounds['game_over'] = pygame.mixer.Sound(os.path.join(sound_path, 'game-over.mp3'))
+            self._try_load_sound('game_over', [
+                os.path.join(sound_path, 'pixel-explosion-319166.mp3'),
+                os.path.join(sound_path, 'game-over.mp3'),
+                os.path.join(sound_path, 'death.mp3'),
+                os.path.join(sound_path, 'death.wav')
+            ])
             
             # Final death sound (when out of lives)
-            if os.path.exists(os.path.join(sound_path, 'pixel-death-66829.mp3')):
-                self.sounds['final_death'] = pygame.mixer.Sound(os.path.join(sound_path, 'pixel-death-66829.mp3'))
+            self._try_load_sound('final_death', [
+                os.path.join(sound_path, 'pixel-death-66829.mp3'),
+                os.path.join(sound_path, 'final-death.mp3'),
+                os.path.join(sound_path, 'final-death.wav')
+            ])
             
             # Game completion sound
-            if os.path.exists(os.path.join(sound_path, 'goodresult-82807.mp3')):
-                self.sounds['game_completed'] = pygame.mixer.Sound(os.path.join(sound_path, 'goodresult-82807.mp3'))
+            self._try_load_sound('game_completed', [
+                os.path.join(sound_path, 'goodresult-82807.mp3'),
+                os.path.join(sound_path, 'complete.mp3'),
+                os.path.join(sound_path, 'complete.wav')
+            ])
             
             # Set volumes for all sounds
             for sound in self.sounds.values():
@@ -76,6 +90,20 @@ class SoundManager:
             print(f"Error loading sounds: {e}")
             print("Continuing without sound effects.")
     
+    def _try_load_sound(self, sound_name, file_paths):
+        """Try to load a sound from multiple possible file paths"""
+        for path in file_paths:
+            try:
+                if os.path.exists(path):
+                    self.sounds[sound_name] = pygame.mixer.Sound(path)
+                    print(f"Successfully loaded {sound_name} sound from: {path}")
+                    return True
+            except Exception as e:
+                print(f"Failed to load {sound_name} sound from {path}: {e}")
+        
+        print(f"Could not find any {sound_name} sound files")
+        return False
+    
     def play_music(self, music_name):
         """Play background music"""
         music_path = resource_path(os.path.join('assets', 'sounds', f'{music_name}.mp3'))
@@ -84,7 +112,7 @@ class SoundManager:
         if os.path.exists(music_path):
             try:
                 pygame.mixer.music.load(music_path)
-                pygame.mixer.music.set_volume(self.music_volume)
+                pygame.mixer.music.set_volume(0 if self.muted else self.music_volume)
                 pygame.mixer.music.play(-1)  # -1 means loop indefinitely
             except Exception as e:
                 print(f"Error playing music: {e}")
@@ -98,7 +126,7 @@ class SoundManager:
             # This is a simple placeholder that creates a basic synth sound
             # In a real game, you'd use actual music files
             pygame.mixer.music.load(self.generate_placeholder_music())
-            pygame.mixer.music.set_volume(self.music_volume * 0.5)  # Lower volume for generated music
+            pygame.mixer.music.set_volume(0 if self.muted else self.music_volume * 0.5)
             pygame.mixer.music.play(-1)
         except:
             print("Could not create placeholder music.")
@@ -181,15 +209,15 @@ class SoundManager:
     def play_sound(self, sound_name):
         """Play a sound effect"""
         if sound_name in self.sounds:
+            print(f"Playing sound: {sound_name}")
             self.sounds[sound_name].play()
     
-    def set_music_volume(self, volume):
-        """Set music volume (0.0 to 1.0)"""
-        self.music_volume = max(0.0, min(1.0, volume))
-        pygame.mixer.music.set_volume(self.music_volume)
+    def toggle_mute(self):
+        """Toggle mute/unmute for background music only"""
+        self.muted = not self.muted
+        pygame.mixer.music.set_volume(0 if self.muted else self.music_volume)
+        print("Music muted" if self.muted else "Music unmuted")
     
-    def set_sfx_volume(self, volume):
-        """Set sound effects volume (0.0 to 1.0)"""
-        self.sfx_volume = max(0.0, min(1.0, volume))
-        for sound in self.sounds.values():
-            sound.set_volume(self.sfx_volume)
+    def get_music_status(self):
+        """Get a string representing the current music status"""
+        return "MUTED" if self.muted else "ON"

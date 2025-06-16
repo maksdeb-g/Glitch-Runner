@@ -90,6 +90,13 @@ class Player(pygame.sprite.Sprite):
                         base_path = os.path.abspath(".")
                     return os.path.join(base_path, relative_path)
             
+            # Import volume settings
+            try:
+                from src.constants import DEFAULT_SFX_VOLUME
+                volume_level = DEFAULT_SFX_VOLUME
+            except ImportError:
+                volume_level = 0.2  # Default to 20% volume if constants can't be imported
+            
             # Try multiple possible paths for the jump sound
             possible_paths = [
                 resource_path(os.path.join('assets', 'sounds', 'jump-audio.mp3')),
@@ -105,8 +112,9 @@ class Player(pygame.sprite.Sprite):
                 try:
                     if os.path.exists(path):
                         self.jump_sound = pygame.mixer.Sound(path)
+                        self.jump_sound.set_volume(volume_level)  # Set volume to the lower level
                         self.double_jump_sound = self.jump_sound  # Use same sound for double jump
-                        print(f"Successfully loaded jump sound from: {path}")
+                        print(f"Successfully loaded jump sound from: {path} with volume {volume_level}")
                         break
                 except Exception as e:
                     print(f"Failed to load sound from {path}: {e}")
