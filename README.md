@@ -2,18 +2,6 @@
 
 A 2D platformer game built with Pygame where you navigate through glitchy environments.
 
-## Setup
-
-1. Install the required dependencies:
-```
-pip install -r requirements.txt
-```
-
-2. Run the game:
-```
-python main.py
-```
-
 ## Controls
 
 - Left Arrow: Move left
