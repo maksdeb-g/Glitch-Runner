@@ -92,7 +92,7 @@ class Game:
         else:
             # Game completed
             self.game_state = "game_completed"
-            self.sound_manager.play_sound('level_complete')
+            self.sound_manager.play_sound('game_completed')
     
     def handle_events(self):
         for event in pygame.event.get():
@@ -172,14 +172,24 @@ class Game:
                 self.lives -= 1
                 self.game_state = "game_over"
                 self.game_over_timer = time.time()
-                self.sound_manager.play_sound('game_over')
+                
+                # Play different sounds based on lives remaining
+                if self.lives <= 0:
+                    self.sound_manager.play_sound('final_death')
+                else:
+                    self.sound_manager.play_sound('game_over')
             
             # Check if player fell off the level
             if self.player.rect.top > SCREEN_HEIGHT:
                 self.lives -= 1
                 self.game_state = "game_over"
                 self.game_over_timer = time.time()
-                self.sound_manager.play_sound('game_over')
+                
+                # Play different sounds based on lives remaining
+                if self.lives <= 0:
+                    self.sound_manager.play_sound('final_death')
+                else:
+                    self.sound_manager.play_sound('game_over')
         
         # Handle timers for game states
         current_time = time.time()

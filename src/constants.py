@@ -29,8 +29,12 @@ GLITCH_INTERVAL = 10  # Seconds between glitches
 GLITCH_DURATION = 5   # How long glitches last (increased to 5 seconds)
 GLITCH_NOTIFICATION_TIME = 2  # How long to show glitch notifications
 
+# Screen shake settings
+SHAKE_INTENSITY_LEVEL4 = 5    # Pixels for level 4 constant shake
+SHAKE_INTENSITY_LEVEL5 = 8    # Pixels for level 5 constant shake
+
 # Game settings
-LEVEL_COUNT = 3  # Number of levels in the game
+LEVEL_COUNT = 5  # Updated number of levels in the game
 
 # Debug settings
 DEBUG_MODE = False  # Set to True to show debug information

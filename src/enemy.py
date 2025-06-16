@@ -128,12 +128,13 @@ class Enemy(pygame.sprite.Sprite):
         )
         self.projectiles.add(projectile)
     
-    def draw(self, screen):
-        # Draw the enemy
-        screen.blit(self.image, self.rect)
+    def draw(self, screen, offset_x=0, offset_y=0):
+        # Draw the enemy with screen shake offset
+        screen.blit(self.image, (self.rect.x + offset_x, self.rect.y + offset_y))
         
-        # Draw projectiles
-        self.projectiles.draw(screen)
+        # Draw projectiles with screen shake offset
+        for projectile in self.projectiles:
+            screen.blit(projectile.image, (projectile.rect.x + offset_x, projectile.rect.y + offset_y))
         
         # Debug visualization
         if DEBUG_MODE:
@@ -141,15 +142,15 @@ class Enemy(pygame.sprite.Sprite):
             pygame.draw.line(
                 screen, 
                 (255, 0, 0), 
-                (self.start_x - self.patrol_distance, self.rect.bottom + 5),
-                (self.start_x + self.patrol_distance, self.rect.bottom + 5),
+                (self.start_x - self.patrol_distance + offset_x, self.rect.bottom + 5 + offset_y),
+                (self.start_x + self.patrol_distance + offset_x, self.rect.bottom + 5 + offset_y),
                 1
             )
             
             # Draw enemy type
             font = pygame.font.SysFont(None, 20)
             type_text = font.render(self.enemy_type, True, (255, 255, 255))
-            screen.blit(type_text, (self.rect.x, self.rect.y - 20))
+            screen.blit(type_text, (self.rect.x + offset_x, self.rect.y - 20 + offset_y))
 
 
 class Projectile(pygame.sprite.Sprite):

@@ -1,6 +1,7 @@
 import pygame
 import math
 import os
+import random
 from src.platform import Platform
 from src.enemy import Enemy
 from src.background import Background
@@ -48,13 +49,31 @@ class Level:
         # Create level exit
         self.exit = LevelExit(level_data["exit_pos"][0], level_data["exit_pos"][1])
         
-        # Create background
+        # Determine level number
         level_num = 1
         if "Level 2" in level_data["name"]:
             level_num = 2
         elif "Level 3" in level_data["name"]:
             level_num = 3
+        elif "Level 4" in level_data["name"]:
+            level_num = 4
+        elif "Level 5" in level_data["name"]:
+            level_num = 5
+            
+        # Create background
         self.background = Background(level_num)
+        
+        # Screen shake settings
+        self.shake_enabled = level_data.get("shake_enabled", False)
+        self.shake_offset_x = 0
+        self.shake_offset_y = 0
+        self.shake_intensity = SHAKE_INTENSITY_LEVEL4 if level_num == 4 else SHAKE_INTENSITY_LEVEL5
+        
+        # Advanced glitches (for level 5)
+        self.advanced_glitches = level_data.get("advanced_glitches", False)
+        self.glitch_timer = 0
+        self.glitch_effect = None
+        self.glitch_duration = 0
         
         # Load level elements
         self.load_platforms(level_data["platforms"])
@@ -79,7 +98,6 @@ class Level:
         player.velocity_y = 0
         player.set_invincible()  # Make player invincible when spawning
     
-    
     def check_exit_collision(self, player):
         # Check if player has reached the exit
         return player.rect.colliderect(self.exit.rect)
@@ -102,10 +120,78 @@ class Level:
         
         return False
     
+    def update_screen_shake(self):
+        """Update screen shake effect"""
+        if self.shake_enabled:
+            # Constant screen shake for levels 4-5
+            self.shake_offset_x = random.randint(-self.shake_intensity, self.shake_intensity)
+            self.shake_offset_y = random.randint(-self.shake_intensity, self.shake_intensity)
+    
+    def update_advanced_glitches(self):
+        """Update advanced glitch effects for level 5"""
+        if not self.advanced_glitches:
+            return
+            
+        self.glitch_timer += 1
+        
+        # Check if we need to start a new glitch effect
+        if self.glitch_effect is None and self.glitch_timer >= 180:  # Every 3 seconds
+            if random.random() < 0.3:  # 30% chance
+                self.start_glitch_effect()
+                self.glitch_timer = 0
+        
+        # Update current glitch effect
+        if self.glitch_effect:
+            self.glitch_duration -= 1
+            if self.glitch_duration <= 0:
+                self.glitch_effect = None
+    
+    def start_glitch_effect(self):
+        """Start a random advanced glitch effect"""
+        # Removed "invert" since it requires numpy/surfarray
+        effect_type = random.choice(["color_shift", "static"])
+        self.glitch_effect = effect_type
+        self.glitch_duration = random.randint(15, 45)  # 0.25 to 0.75 seconds
+    
+    def apply_glitch_effect(self, screen):
+        """Apply the current glitch effect to the screen"""
+        if not self.glitch_effect:
+            return
+            
+        # Create a copy of the screen
+        screen_copy = screen.copy()
+        
+        if self.glitch_effect == "color_shift":
+            # Simple color shift without using surfarray
+            shift_amount = random.randint(3, 8)
+            screen.blit(screen_copy, (shift_amount, 0))
+            
+        elif self.glitch_effect == "static":
+            # Add static noise to a portion of the screen
+            height = random.randint(5, 20)
+            y_pos = random.randint(0, SCREEN_HEIGHT - height)
+            
+            # Create static noise
+            static = pygame.Surface((SCREEN_WIDTH, height))
+            for x in range(0, SCREEN_WIDTH, 2):
+                for y in range(0, height, 2):
+                    if random.random() < 0.5:
+                        color = (random.randint(200, 255), random.randint(200, 255), random.randint(200, 255))
+                        static.set_at((x, y), color)
+            
+            # Apply static with transparency
+            static.set_alpha(100)
+            screen.blit(static, (0, y_pos))
     
     def update(self, player):
         # Update background
         self.background.update()
+        
+        # Update screen shake
+        self.update_screen_shake()
+        
+        # Update advanced glitches
+        self.update_advanced_glitches()
         
         # Update all platforms
         for platform in self.platforms:
@@ -128,12 +214,21 @@ class Level:
         # Draw background
         self.background.draw(screen)
         
-        # Draw platforms
-        self.platforms.draw(screen)
+        # Calculate shake offset
+        offset_x = self.shake_offset_x
+        offset_y = self.shake_offset_y
         
-        # Draw exit
-        screen.blit(self.exit.image, self.exit.rect)
+        # Draw platforms with shake offset
+        for platform in self.platforms:
+            screen.blit(platform.image, (platform.rect.x + offset_x, platform.rect.y + offset_y))
         
-        # Draw enemies
+        # Draw exit with shake offset
+        screen.blit(self.exit.image, (self.exit.rect.x + offset_x, self.exit.rect.y + offset_y))
+        
+        # Draw enemies with shake offset
         for enemy in self.enemies:
-            enemy.draw(screen)
+            enemy.draw(screen, offset_x, offset_y)
+        
+        # Apply advanced glitch effects (level 5)
+        if self.advanced_glitches:
+            self.apply_glitch_effect(screen)

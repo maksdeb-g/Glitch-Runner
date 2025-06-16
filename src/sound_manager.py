@@ -26,6 +26,9 @@ class SoundManager:
             if os.path.exists(os.path.join(sound_path, 'jump.wav')):
                 self.sounds['jump'] = pygame.mixer.Sound(os.path.join(sound_path, 'jump.wav'))
             
+            if os.path.exists(os.path.join(sound_path, 'jump-audio.mp3')):
+                self.sounds['jump'] = pygame.mixer.Sound(os.path.join(sound_path, 'jump-audio.mp3'))
+            
             if os.path.exists(os.path.join(sound_path, 'land.wav')):
                 self.sounds['land'] = pygame.mixer.Sound(os.path.join(sound_path, 'land.wav'))
             
@@ -35,8 +38,19 @@ class SoundManager:
             if os.path.exists(os.path.join(sound_path, 'level_complete.wav')):
                 self.sounds['level_complete'] = pygame.mixer.Sound(os.path.join(sound_path, 'level_complete.wav'))
             
-            if os.path.exists(os.path.join(sound_path, 'game_over.wav')):
-                self.sounds['game_over'] = pygame.mixer.Sound(os.path.join(sound_path, 'game_over.wav'))
+            # Game over sound (single death)
+            if os.path.exists(os.path.join(sound_path, 'pixel-explosion-319166.mp3')):
+                self.sounds['game_over'] = pygame.mixer.Sound(os.path.join(sound_path, 'pixel-explosion-319166.mp3'))
+            elif os.path.exists(os.path.join(sound_path, 'game-over.mp3')):
+                self.sounds['game_over'] = pygame.mixer.Sound(os.path.join(sound_path, 'game-over.mp3'))
+            
+            # Final death sound (when out of lives)
+            if os.path.exists(os.path.join(sound_path, 'pixel-death-66829.mp3')):
+                self.sounds['final_death'] = pygame.mixer.Sound(os.path.join(sound_path, 'pixel-death-66829.mp3'))
+            
+            # Game completion sound
+            if os.path.exists(os.path.join(sound_path, 'goodresult-82807.mp3')):
+                self.sounds['game_completed'] = pygame.mixer.Sound(os.path.join(sound_path, 'goodresult-82807.mp3'))
             
             # Set volumes for all sounds
             for sound in self.sounds.values():

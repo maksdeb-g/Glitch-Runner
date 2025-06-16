@@ -115,5 +115,142 @@ LEVEL_3 = {
     ]
 }
 
+# Level 4 - Constant screen shaking level
+LEVEL_4 = {
+    "name": "Level 4: Reality Breakdown",
+    "background_color": (45, 15, 45),  # Purple-red mix
+    "player_start": (50, SCREEN_HEIGHT - 150),
+    "exit_pos": (SCREEN_WIDTH - 50, 50),
+    "lives": 6,
+    "shake_enabled": True,  # Enable constant screen shaking
+    "platforms": [
+        # Ground - broken into segments to represent unstable reality
+        (0, SCREEN_HEIGHT - 50, 150, 50),
+        (200, SCREEN_HEIGHT - 50, 150, 50),
+        (400, SCREEN_HEIGHT - 50, 150, 50),
+        (600, SCREEN_HEIGHT - 50, 200, 50),
+        
+        # Floating platforms - more chaotic arrangement
+        (100, SCREEN_HEIGHT - 180, 80, 20),
+        (250, SCREEN_HEIGHT - 250, 80, 20),
+        (150, SCREEN_HEIGHT - 320, 80, 20),
+        (300, SCREEN_HEIGHT - 390, 80, 20),
+        
+        # Middle section - moving upward
+        (400, SCREEN_HEIGHT - 200, 70, 20),
+        (500, SCREEN_HEIGHT - 280, 70, 20),
+        (400, SCREEN_HEIGHT - 360, 70, 20),
+        (500, SCREEN_HEIGHT - 440, 70, 20),
+        
+        # Final approach
+        (600, SCREEN_HEIGHT - 300, 100, 20),
+        (650, SCREEN_HEIGHT - 400, 100, 20),
+        (600, SCREEN_HEIGHT - 500, 200, 20),
+        
+        # Walls - more scattered
+        (350, SCREEN_HEIGHT - 300, 20, 200),
+        (550, SCREEN_HEIGHT - 500, 20, 150),
+        (250, SCREEN_HEIGHT - 400, 20, 100),
+    ],
+    "enemies": [
+        # More enemies with varied types
+        (250, SCREEN_HEIGHT - 90, 100, "basic"),
+        (500, SCREEN_HEIGHT - 90, 150, "jumper"),
+        
+        # Platform enemies - more aggressive placement
+        (100, SCREEN_HEIGHT - 220, 80, "shooter"),
+        (250, SCREEN_HEIGHT - 290, 80, "basic"),
+        (300, SCREEN_HEIGHT - 430, 80, "jumper"),
+        
+        # Higher level enemies
+        (400, SCREEN_HEIGHT - 240, 70, "shooter"),
+        (500, SCREEN_HEIGHT - 320, 70, "basic"),
+        (400, SCREEN_HEIGHT - 400, 70, "jumper"),
+        
+        # Final approach - gauntlet of enemies
+        (600, SCREEN_HEIGHT - 340, 100, "shooter"),
+        (650, SCREEN_HEIGHT - 440, 100, "jumper"),
+        (700, SCREEN_HEIGHT - 540, 100, "shooter"),
+    ]
+}
+
+# Level 5 - Advanced glitches with screen shaking
+LEVEL_5 = {
+    "name": "Level 5: System Collapse",
+    "background_color": (50, 10, 20),  # Darker red
+    "player_start": (50, SCREEN_HEIGHT - 150),
+    "exit_pos": (SCREEN_WIDTH - 50, 50),
+    "lives": 8,
+    "shake_enabled": True,  # Enable constant screen shaking (more intense)
+    "advanced_glitches": True,  # Enable advanced glitch effects
+    "platforms": [
+        # Ground - very broken to represent collapsing system
+        (0, SCREEN_HEIGHT - 50, 100, 50),
+        (150, SCREEN_HEIGHT - 50, 100, 50),
+        (300, SCREEN_HEIGHT - 50, 100, 50),
+        (450, SCREEN_HEIGHT - 50, 100, 50),
+        (600, SCREEN_HEIGHT - 50, 100, 50),
+        (750, SCREEN_HEIGHT - 50, 50, 50),
+        
+        # Left side - chaotic ascent
+        (50, SCREEN_HEIGHT - 150, 60, 20),
+        (150, SCREEN_HEIGHT - 220, 60, 20),
+        (50, SCREEN_HEIGHT - 290, 60, 20),
+        (150, SCREEN_HEIGHT - 360, 60, 20),
+        (50, SCREEN_HEIGHT - 430, 60, 20),
+        
+        # Middle section - complex obstacle course
+        (250, SCREEN_HEIGHT - 180, 50, 20),
+        (350, SCREEN_HEIGHT - 240, 50, 20),
+        (450, SCREEN_HEIGHT - 300, 50, 20),
+        (350, SCREEN_HEIGHT - 360, 50, 20),
+        (250, SCREEN_HEIGHT - 420, 50, 20),
+        (350, SCREEN_HEIGHT - 480, 50, 20),
+        
+        # Right side - final difficult ascent
+        (550, SCREEN_HEIGHT - 200, 70, 20),
+        (650, SCREEN_HEIGHT - 270, 70, 20),
+        (550, SCREEN_HEIGHT - 340, 70, 20),
+        (650, SCREEN_HEIGHT - 410, 70, 20),
+        (550, SCREEN_HEIGHT - 480, 70, 20),
+        (650, SCREEN_HEIGHT - 550, 150, 20),
+        
+        # Walls - scattered throughout
+        (200, SCREEN_HEIGHT - 250, 20, 150),
+        (500, SCREEN_HEIGHT - 350, 20, 200),
+        (300, SCREEN_HEIGHT - 450, 20, 150),
+        (600, SCREEN_HEIGHT - 500, 20, 250),
+    ],
+    "enemies": [
+        # Ground level - gauntlet of enemies
+        (100, SCREEN_HEIGHT - 90, 100, "basic"),
+        (250, SCREEN_HEIGHT - 90, 100, "jumper"),
+        (400, SCREEN_HEIGHT - 90, 100, "shooter"),
+        (550, SCREEN_HEIGHT - 90, 100, "basic"),
+        (700, SCREEN_HEIGHT - 90, 100, "jumper"),
+        
+        # Left side ascent
+        (50, SCREEN_HEIGHT - 190, 60, "shooter"),
+        (150, SCREEN_HEIGHT - 260, 60, "basic"),
+        (50, SCREEN_HEIGHT - 330, 60, "jumper"),
+        (150, SCREEN_HEIGHT - 400, 60, "shooter"),
+        
+        # Middle obstacle course
+        (250, SCREEN_HEIGHT - 220, 50, "basic"),
+        (350, SCREEN_HEIGHT - 280, 50, "jumper"),
+        (450, SCREEN_HEIGHT - 340, 50, "shooter"),
+        (350, SCREEN_HEIGHT - 400, 50, "basic"),
+        (250, SCREEN_HEIGHT - 460, 50, "jumper"),
+        
+        # Right side - final ascent
+        (550, SCREEN_HEIGHT - 240, 70, "shooter"),
+        (650, SCREEN_HEIGHT - 310, 70, "basic"),
+        (550, SCREEN_HEIGHT - 380, 70, "jumper"),
+        (650, SCREEN_HEIGHT - 450, 70, "shooter"),
+        (550, SCREEN_HEIGHT - 520, 70, "basic"),
+        (700, SCREEN_HEIGHT - 590, 100, "jumper"),
+    ]
+}
+
 # List of all levels
-LEVELS = [LEVEL_1, LEVEL_2, LEVEL_3]
+LEVELS = [LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5]

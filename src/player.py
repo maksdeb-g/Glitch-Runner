@@ -78,13 +78,13 @@ class Player(pygame.sprite.Sprite):
             pygame.mixer.init()
             sound_path = os.path.join('assets', 'sounds')
             
-            # Placeholder for actual sound loading
-            # self.jump_sound = pygame.mixer.Sound(os.path.join(sound_path, 'jump.wav'))
-            # self.land_sound = pygame.mixer.Sound(os.path.join(sound_path, 'land.wav'))
-            # self.wall_slide_sound = pygame.mixer.Sound(os.path.join(sound_path, 'wall_slide.wav'))
-            # self.double_jump_sound = pygame.mixer.Sound(os.path.join(sound_path, 'double_jump.wav'))
-        except:
-            print("Sound files could not be loaded. Continuing without sound.")
+            # Check for jump audio
+            jump_audio_path = os.path.join(sound_path, 'jump-audio.mp3')
+            if os.path.exists(jump_audio_path):
+                self.jump_sound = pygame.mixer.Sound(jump_audio_path)
+                self.double_jump_sound = self.jump_sound  # Use same sound for double jump
+        except Exception as e:
+            print(f"Sound files could not be loaded: {e}. Continuing without sound.")
     
     def handle_event(self, event):
         # Handle key press events
